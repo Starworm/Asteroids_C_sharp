@@ -16,7 +16,7 @@ namespace Asteroids
 
         public FirstAid(Point pos, Point dir, Size size) : base(pos, dir, size)
         {
-            Heal = 1;
+            Heal = 5;
         }
 
         public override void Draw()
@@ -30,8 +30,27 @@ namespace Asteroids
         {
             pos.X += dir.X;
 
-            if (pos.X < 0)
-                pos.X = Game.Width + size.Width;
+            //if (pos.X < 0)
+            //    pos.X = Game.Width + size.Width;
+        }
+
+        internal void Regenerate()
+        {
+            pos.X = 850;
+            pos.Y = rand_height.Next(0, Game.Height);
+        }
+
+        // Метод "уничтожения" аптечки. На самом деле уносим аптечку далеко влево от экрана
+        public void Destroy()
+        {
+            pos.X = -100;
+        }
+
+        // Проверка вылета аптечки за пределы экрана
+        public bool IsGone()
+        {
+            return pos.X < -50;                
+            
         }
     }
 }

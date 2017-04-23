@@ -17,13 +17,15 @@ namespace Asteroids
 
         static Bullet bullet; // Пуля
         static Asteroid[] asteroids; // Массив астероидов
-        static FirstAid[] firstAids; // Массив аптечек
         static FirstAid firstAid; // Аптечка
         //static double delayTime; // Время минимальной задержки появления аптечки
         //static double realDelay; // Время реальной задержки появления
         static Ship ship;
         static Timer timer = new Timer();
+        //static Timer timer_firstAid = new Timer();
+        //static System.Timers.Timer timer_firstAid = new System.Timers.Timer(5000);
         static string path = @"h:\С_sharp_projects\C_sharp_lev2\Asteroids_C_sharp\Asteroids\bin\log.txt";
+        static int score = 0; // Количество набранных очков
 
         static BaseObject[] stars; // Массив звезд
         // Двойная буферизация - вывод в буфер, а затем на форму
@@ -69,16 +71,20 @@ namespace Asteroids
                 Console.WriteLine("Размеры экрана должны быть от 0 до 1000 пикселей");
             }
             Load();
+            LoadFirstAid();
             
             // Таймер для вызова Draw и Update            
             timer.Interval = 100;            
             timer.Tick += Timer_Tick;
-            form.KeyDown += Form_KeyDown;
+            form.KeyDown += Form_KeyDown;            
             
             timer.Start();
+        }
 
-            // Таймер для вызова генерации аптечек
-            //timer.Interval = 5000;
+        // Обработчки события регенерации аптечки
+        private static void Timer_firstAid_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            firstAid.Regenerate(); // Регенерация аптечки
         }
 
         private static void Form_KeyDown(object sender, KeyEventArgs e)
@@ -103,16 +109,17 @@ namespace Asteroids
 
         static public void Draw()
         {
-            // Проверяем вывод графики
+            // Проверяем вывод графики, выводим информацию об энергии корабля и набранных очках
             buffer.Graphics.DrawImage(img, 0, 0);
-            buffer.Graphics.DrawString(ship.Power.ToString(), SystemFonts.DefaultFont, Brushes.AliceBlue, 0, 0);
+            buffer.Graphics.DrawString("Power: ", SystemFonts.DefaultFont, Brushes.Aqua, 0, 0);
+            buffer.Graphics.DrawString(ship.Power.ToString(), SystemFonts.DefaultFont, Brushes.AliceBlue, 40, 0);
+            buffer.Graphics.DrawString("Score: ", SystemFonts.DefaultFont, Brushes.Aqua, 0, 12);
+            buffer.Graphics.DrawString(Game.score.ToString(), SystemFonts.DefaultFont, Brushes.AliceBlue, 40, 12);
 
             foreach (BaseObject obj in stars)
                 obj.Draw();
             foreach (BaseObject obj in asteroids)
                 obj.Draw();
-            //foreach (BaseObject obj in firstAids)
-            //    obj.Draw();
             firstAid.Draw();
 
             bullet?.Draw();
@@ -133,6 +140,7 @@ namespace Asteroids
                 {
                     Console.WriteLine("Crash!");
                     string text = "Астероид сбит";
+                    Game.score += 1;
                     PrintF(path, text); // Запись в файл
                     obj.Regenerate();   // ... и астероида
                 }
@@ -147,18 +155,33 @@ namespace Asteroids
                 bullet?.Update();
             }
 
-
             firstAid.Update();
-
-            // При столкновении...
+            // При столкновении с аптечкой
             if (firstAid.Collision(ship))
             {
-                Console.WriteLine("Аптечка взята");
+                //Console.WriteLine("Аптечка взята");
                 string text = "Аптечка взята"; // Запись в файл
                 PrintF(path, text);
-                ship.Power += firstAid.Heal; // Увеличение здоровья                     
+                ship.Power += firstAid.Heal; // Увеличение здоровья
+                                             //LoadFirstAid();
+                FirstAidTimer(); // Выполняем новую генерацию аптечки
+                //firstAid.Regenerate(); // Регенерация аптечки
             }
-                    //bullet?.Update();
+            // При вылете аптечки за пределы экрана
+            else if(firstAid.IsGone())
+            {
+                FirstAidTimer();
+            }
+        }
+
+        // Таймер генерации аптечки
+        private static void FirstAidTimer()
+        {
+            System.Timers.Timer timer_firstAid = new System.Timers.Timer(5000); // Задержка между генерациями аптечек - 5 секунд
+            firstAid.Destroy(); // "Уничтожаем" аптечку перед генерацией новой
+            timer_firstAid.Elapsed += Timer_firstAid_Elapsed; // После истечения 5 секунд происходит событие
+            timer_firstAid.AutoReset = false; // Вызываем событие после 5 секунд
+            timer_firstAid.Start(); // Запускаем таймер отсчета 5 секунд
         }
 
         static public void Load()
@@ -176,7 +199,6 @@ namespace Asteroids
                         );
             }
             ship = new Ship(new Point(0, 200), new Point(5, 0), new Size(10, 10));
-            //bullet = new Bullet(new Point(0, 200), new Point(5, 0), new Size(4, 1));
             Ship.MessageDie += Ship_MessageDie;
 
             // Генерация астероидов
@@ -190,13 +212,17 @@ namespace Asteroids
                         new Size(r, r)
                         );
             }
-            //bullet = new Bullet(new Point(0, 400), new Point(5, 0), new Size(5, 2));
+        }
 
+        // Генерация аптечки
+        // Вынесено отдельно от генерации остальных объектов для реализации задержки по времени
+        static public void LoadFirstAid()
+        {
             // Генерация аптечки
             int r2 = rnd1.Next(5, 50);
             firstAid = new FirstAid(
-                        new Point(400, Game.rnd1.Next(0, Game.Height)),
-                        new Point(-r2, r2),
+                        new Point(800, Game.rnd1.Next(0, Game.Height)),
+                        new Point(-15,15),
                         new Size(r2, r2)
                         );
         }
