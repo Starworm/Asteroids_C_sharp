@@ -1,0 +1,6 @@
+H:\С_sharp_projects\C_sharp_lev2\Asteroids\HomeWork_2-1\bin\Debug\HomeWork_2-1.exe.config
+H:\С_sharp_projects\C_sharp_lev2\Asteroids\HomeWork_2-1\bin\Debug\HomeWork_2-1.exe
+H:\С_sharp_projects\C_sharp_lev2\Asteroids\HomeWork_2-1\bin\Debug\HomeWork_2-1.pdb
+H:\С_sharp_projects\C_sharp_lev2\Asteroids\HomeWork_2-1\obj\Debug\HomeWork_2-1.csprojResolveAssemblyReference.cache
+H:\С_sharp_projects\C_sharp_lev2\Asteroids\HomeWork_2-1\obj\Debug\HomeWork_2-1.exe
+H:\С_sharp_projects\C_sharp_lev2\Asteroids\HomeWork_2-1\obj\Debug\HomeWork_2-1.pdb
