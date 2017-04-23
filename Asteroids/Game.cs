@@ -18,13 +18,14 @@ namespace Asteroids
         static Bullet bullet; // Пуля
         static Asteroid[] asteroids; // Массив астероидов
         static FirstAid[] firstAids; // Массив аптечек
+        static FirstAid firstAid; // Аптечка
         //static double delayTime; // Время минимальной задержки появления аптечки
         //static double realDelay; // Время реальной задержки появления
         static Ship ship;
         static Timer timer = new Timer();
-        static string path = @"h:\С_sharp_projects\C_sharp_lev2\Asteroids\Asteroids\bin\log.txt";
+        static string path = @"h:\С_sharp_projects\C_sharp_lev2\Asteroids_C_sharp\Asteroids\bin\log.txt";
 
-        static BaseObject[] objs;
+        static BaseObject[] stars; // Массив звезд
         // Двойная буферизация - вывод в буфер, а затем на форму
         static BufferedGraphicsContext context;
         static public BufferedGraphics buffer;
@@ -106,12 +107,13 @@ namespace Asteroids
             buffer.Graphics.DrawImage(img, 0, 0);
             buffer.Graphics.DrawString(ship.Power.ToString(), SystemFonts.DefaultFont, Brushes.AliceBlue, 0, 0);
 
-            foreach (BaseObject obj in objs)
+            foreach (BaseObject obj in stars)
                 obj.Draw();
             foreach (BaseObject obj in asteroids)
                 obj.Draw();
-            foreach (BaseObject obj in firstAids)
-                obj.Draw();
+            //foreach (BaseObject obj in firstAids)
+            //    obj.Draw();
+            firstAid.Draw();
 
             bullet?.Draw();
             ship.Draw();
@@ -120,7 +122,7 @@ namespace Asteroids
 
         static public void Update()
         {
-            foreach (BaseObject obj in objs)
+            foreach (BaseObject obj in stars)
                 obj.Update();
             foreach (Asteroid obj in asteroids)
             {
@@ -132,7 +134,7 @@ namespace Asteroids
                     Console.WriteLine("Crash!");
                     string text = "Астероид сбит";
                     PrintF(path, text); // Запись в файл
-                    obj.Regenerate();    // ... и астероида
+                    obj.Regenerate();   // ... и астероида
                 }
                 if (obj.Collision(ship))
                 {
@@ -145,32 +147,29 @@ namespace Asteroids
                 bullet?.Update();
             }
 
-            foreach (FirstAid obj in firstAids)
+
+            firstAid.Update();
+
+            // При столкновении...
+            if (firstAid.Collision(ship))
             {
-                 obj.Update();
-
-                 // При столкновении...
-                 if (obj.Collision(ship))
-                 {
-                     Console.WriteLine("Аптечка взята");
-                     string text = "Аптечка взята"; // Запись в файл
-                     PrintF(path, text);
-                     ship.Power += 5;
-                 }
-                    //bullet?.Update();
+                Console.WriteLine("Аптечка взята");
+                string text = "Аптечка взята"; // Запись в файл
+                PrintF(path, text);
+                ship.Power += firstAid.Heal; // Увеличение здоровья                     
             }
-
+                    //bullet?.Update();
         }
 
         static public void Load()
         {
 
             // Генерация звезд
-            objs = new BaseObject[15];
-            for (int i = 0; i < objs.Length; i++)
+            stars = new BaseObject[15];
+            for (int i = 0; i < stars.Length; i++)
             {
                 int r1 = rnd2.Next(5, 50);
-                objs[i] = new Star(
+                stars[i] = new Star(
                         new Point(800, Game.rnd2.Next(0, Game.Height)),
                         new Point(-r1/5, r1/5),
                         new Size(r1, r1)
@@ -193,17 +192,13 @@ namespace Asteroids
             }
             //bullet = new Bullet(new Point(0, 400), new Point(5, 0), new Size(5, 2));
 
-            // Генерация аптечек
-            firstAids = new FirstAid[20];
-            for (int i = 0; i < firstAids.Length; i++)
-            {
-                int r = rnd1.Next(5, 50);
-                firstAids[i] = new FirstAid(
+            // Генерация аптечки
+            int r2 = rnd1.Next(5, 50);
+            firstAid = new FirstAid(
                         new Point(400, Game.rnd1.Next(0, Game.Height)),
-                        new Point(-r, r),
-                        new Size(r, r)
+                        new Point(-r2, r2),
+                        new Size(r2, r2)
                         );
-            }
         }
 
         private static void Ship_MessageDie()

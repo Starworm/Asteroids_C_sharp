@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Asteroids
 {
-    // Аптечка
     class FirstAid: BaseObject
     {
         Image img = Asteroids.Properties.Resources.firstaid_1;
